@@ -5,16 +5,13 @@
  * ------------------------------------------------------------------------- */
 
 // --------------- Common Includes ---------------
-#include <stdalign.h> // alignof
-#include <stdarg.h>   // va_list, va_start, va_end
-#include <stdbool.h>  // bool
-#include <stddef.h>   // ptrdiff_t
-#include <stdint.h>   // uint.., int..
-#include <stdio.h>    // fprintf, stderr, ..
-#include <stdlib.h>   // strtoul, strtod
+#include <stddef.h> // ptrdiff_t
+#include <stdint.h> // uint.., int..
+#include <stdio.h>  // fprintf, stderr, ..
+#include <string.h> // memset, memcpy
 
 #include <inttypes.h> // strtoimax
-#include <string.h>   // memset, memcpy
+#include <stdlib.h>   // strtoul, strtod
 
 // --------------- Primitives ---------------
 typedef uintptr_t uptr;
@@ -32,6 +29,19 @@ typedef int64_t  i64;
 typedef float    f32;
 typedef double   f64;
 
+#define countof(a)  (isize)(sizeof(a) / sizeof(*(a)))
+#define lengthof(s) (countof(s) - 1)
+
+#define SI static inline
+
+#define RANGE(i, n) for (isize i = 0; i < (n); i++)
+
+// clang-format off
+#define maximum(a,b)  ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
+#define minimum(a,b)  ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a < _b ? _a : _b; })
+// clang-format on
+
+// --------------- String basics ---------------
 typedef struct
 {
     char* buf;
@@ -70,14 +80,14 @@ typedef struct
 // --------------- Helpers ---------------
 // clang-format off
 
-#define SI static inline
-
 #define MAX_LEN_INTEGER 32
 #define MAX_LEN_DOUBLE  32
 
-#define BufferAt(len)            (p->buf[p->pos + (len)])
-#define BufferErrorIf(cond, val) if ((cond)) { p->err = -1; return val; }
-#define BufferStr(p, start)      (Str){.buf = &p->buf[(start)], .len = (p->pos - (start))}
+#define BufferAt(len)               (p->buf[p->pos + (len)])
+#define BufferStr(p, start)         (Str){.buf = &p->buf[(start)], .len = (p->pos - (start))}
+#define BufferErrorIf(cond, val)    if ((cond)) { p->err = -1; return val; }
+#define BufferCheckCap(cap, val)    if ((p->pos + cap > p->len)) { p->err = -1; return val; }
+#define BufferSafe(p, expr, start)  expr; if (p->err) { return BufferStr(p, start); }
 
 #define is_sign(c)   ((c == '-') || (c == '+'))
 #define is_exp(c)    ((c == 'e') || (c == 'E'))

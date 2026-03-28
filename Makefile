@@ -1,4 +1,4 @@
-.PHONY: all configure clean install vars
+.PHONY: all configure test clean install vars
 
 SHELL    := /bin/bash
 PRESET    = default
@@ -10,6 +10,9 @@ all:
 
 configure:
 	cmake --preset $(PRESET)
+
+test:
+	ctest --test-dir $(BUILD_DIR)/tests --preset $(PRESET)
 
 clean:
 	rm -f -r $(BUILD_DIR)
