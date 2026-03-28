@@ -1,42 +1,47 @@
 #include "types.h"
+#include "user.h"
 
-#include <stz/args.h>
+#define print_str(dst) fprintf(stdout, "%.*s\n", (int)dst.len, dst.buf)
 
-struct
-{
-    Str0 path;
-    bool help;
-} cfg = {
-    .path = Str0_("./"),
-    .help = false,
-};
-
-// clang-format off
-Arg options[] = {
-    {Str_("help"), no_argument,       0, Str_("Show help"),  ARG_Bool,   &cfg.help, false},
-    {Str_("path"), required_argument, 0, Str_("Input path"), ARG_String, &cfg.path, false},
-};
-// clang-format on
-
-int main(int argc, char* argv[])
+int main()
 {
 
-    int   err  = 0;
-    Arena perm = arena_new(MB_);
+    Struct_A a = {
+        .bool_a = true,
+        .u64_a  = 10,
+        .u64_b  = 20,
+        .i32_a  = -30,
+        .f64_a  = 3.14,
+        .str_a  = _("hello"),
+        .str_b  = _("hi"),
+    };
 
-    Args args = {.buf = options, .len = countof(options), .usage = Str0_("xjson [OPTIONS]")};
+    u64 u64s[3] = {};
+    for (isize i = 0; i < 3; i++) u64s[i] = i;
 
-    err = args_parse(&perm, &args, argc, argv, true);
-    OnError_Goto(err, __close, "Failed: args_parse(err=%d)", err);
+    f32 f32s[3] = {};
+    for (isize i = 0; i < 3; i++) f32s[i] = i;
 
-    if (cfg.help)
-    {
-        args_dump_help(&args);
-        return EXIT_SUCCESS;
-    }
+    Struct_A arr_a[] = {a, a};
 
-__close:
-    arena_free(&perm);
+    Struct_B b = {
+        .u64s_     = {.buf = u64s, .len = 3},
+        .f32s_     = {.buf = f32s, .len = 3},
+        .arr_a     = {.buf = arr_a, .len = 2},
+        .struct_a_ = a,
+    };
 
-    return err ? EXIT_SUCCESS : EXIT_FAILURE;
+    char   buf[1024] = {};
+    Buffer p         = {
+                .buf = buf,
+                .len = 1024,
+                .pos = 0,
+                .err = 0,
+    };
+
+    Str dst_a = print__Struct_A(&p, &a);
+    print_str(dst_a);
+
+    Str dst_b = print__Struct_B(&p, &b);
+    print_str(dst_b);
 }
