@@ -1,5 +1,9 @@
 #pragma once
 
+/* ---------------------------------------------------------------------------
+ *  Prerequisites
+ * ------------------------------------------------------------------------- */
+
 // --------------- Common Includes ---------------
 #include <stdalign.h> // alignof
 #include <stdarg.h>   // va_list, va_start, va_end
@@ -35,7 +39,8 @@ typedef struct
 
 } Str;
 
-#define _(s) (Str){.buf = s, .len = sizeof(s) - 1}
+#define _(s)  (Str){.buf = s, .len = sizeof(s) - 1}
+#define __(s) (int)s.len, s.buf
 
 static inline bool str_equal(Str s1, Str s2)
 {
@@ -44,32 +49,35 @@ static inline bool str_equal(Str s1, Str s2)
     return !memcmp(s1.buf, s2.buf, s1.len);
 }
 
+/* ---------------------------------------------------------------------------
+ *  Meat
+ * ------------------------------------------------------------------------- */
+
 // --------------- Parser ---------------
 typedef struct
 {
+
     char* buf;
     isize len;
+
     isize pos;
     int   err;
 
-    int indent;
+    void* ctx;
 
 } Buffer;
 
-typedef int (*parse_type_fn)(Buffer* b, void* val);
-typedef int (*print_type_fn)(Buffer* b, void* val);
-
-// --------------- helpers ---------------
+// --------------- Helpers ---------------
+// clang-format off
 
 #define SI static inline
 
 #define MAX_LEN_INTEGER 32
 #define MAX_LEN_DOUBLE  32
 
-// clang-format off
 #define BufferAt(len)            (p->buf[p->pos + (len)])
 #define BufferErrorIf(cond, val) if ((cond)) { p->err = -1; return val; }
-#define BufferStr(p, start)      (Str){.buf = &p->buf[start], .len = (p->pos - start)}
+#define BufferStr(p, start)      (Str){.buf = &p->buf[(start)], .len = (p->pos - (start))}
 
 #define is_sign(c)   ((c == '-') || (c == '+'))
 #define is_exp(c)    ((c == 'e') || (c == 'E'))
@@ -77,4 +85,5 @@ typedef int (*print_type_fn)(Buffer* b, void* val);
 #define is_hex(c)    (((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F')) || is_digit(c))
 #define is_ws(c)     ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\r'))
 #define is_escape(c) ((c == '"') || (c == '\\') || (c == '/') || (c == 'b') || (c == 'f') || (c == 'n') || (c == 'r') || (c == 't'))
+
 // clang-format on

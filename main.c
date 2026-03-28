@@ -1,7 +1,8 @@
-#include "types.h"
-#include "user.h"
+#include "user-parse.h"
+#include "user-print.h"
 
 #define print_str(dst) fprintf(stdout, "%.*s\n", (int)dst.len, dst.buf)
+#define print_err(err) fprintf(stdout, "err=%d\n", err)
 
 int main()
 {
@@ -32,16 +33,42 @@ int main()
     };
 
     char   buf[1024] = {};
-    Buffer p         = {
-                .buf = buf,
-                .len = 1024,
-                .pos = 0,
-                .err = 0,
+    Buffer print_buf = {
+        .buf = buf,
+        .len = 1024,
+        .pos = 0,
+        .err = 0,
     };
 
-    Str dst_a = print__Struct_A(&p, &a);
+    Str dst_a = print__Struct_A(&print_buf, &a);
     print_str(dst_a);
 
-    Str dst_b = print__Struct_B(&p, &b);
+    Str dst_b = print__Struct_B(&print_buf, &b);
     print_str(dst_b);
+
+    Struct_A a_ = {};
+
+    Str src_a = _("{\"bool_a\" : true}");
+    print_str(src_a);
+
+    Buffer parse_buf = {
+        .buf = src_a.buf,
+        .len = src_a.len,
+        .pos = 0,
+        .err = 0,
+    };
+
+    char   rebuf[1024] = {};
+    Buffer reprint_buf = {
+        .buf = rebuf,
+        .len = 1024,
+        .pos = 0,
+        .err = 0,
+    };
+
+    int err = parse__Struct_A(&parse_buf, &a_);
+    print_err(err);
+
+    Str re_dst_a = print__Struct_A(&reprint_buf, &a_);
+    print_str(re_dst_a);
 }
