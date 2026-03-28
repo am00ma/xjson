@@ -3,11 +3,22 @@
 #include "test.h"
 
 // clang-format off
-#define DECLARE_EXAMPLE_STRUCT(type, name) typedef struct { Str src; isize buflen; type in; int err; Str dst; } name
-#define SETUP_BUFFER(b, n)           \
-    char buf__[n] = {};              \
-    memset(buf__, 0, sizeof(buf__)); \
-    Buffer b = {.buf = buf__, .len = sizeof(buf__)};
+
+#define DECLARE_EXAMPLE_STRUCT(type, name) \
+    typedef struct                         \
+    {                                      \
+        Str   src;                         \
+        isize buflen;                      \
+        type  in;                          \
+        int   err;                         \
+        Str   dst;                         \
+    } name
+
+#define SETUP_BUFFER(b, n)                 \
+    char buf__[n] = {};                    \
+    memset(buf__, 0, n);                   \
+    Buffer b = {.buf = buf__, .len = n};
+
 // clang-format on
 
 DECLARE_EXAMPLE_STRUCT(char, TestConcatChar);

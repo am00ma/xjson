@@ -5,7 +5,7 @@
 SI Str concat__char(Buffer* p, char c)
 {
     BufferCheckCap(1, (Str){});      // Check capacity
-    BufferAt(0) = c;                 // Set buffer
+    BufferAt(p, 0) = c;              // Set buffer
     p->pos++;                        // Update position
     return BufferStr(p, p->pos - 1); // Return only char
 }
@@ -13,7 +13,7 @@ SI Str concat__char(Buffer* p, char c)
 SI Str concat__string(Buffer* p, Str c)
 {
     isize len = minimum(p->len - p->pos, c.len);             // Print as much as possible
-    memcpy(&BufferAt(0), c.buf, len);                        //
+    memcpy(&BufferAt(p, 0), c.buf, len);                     //
     p->pos += len;                                           //
     BufferErrorIf(len != c.len, BufferStr(p, p->pos - len)); // Set error if incomplete
     return BufferStr(p, p->pos - c.len);                     // Return full string
@@ -38,24 +38,24 @@ SI Str concat__bool(Buffer* p, bool x)
 
 SI Str concat__unsigned_int(Buffer* p, u64 x)
 {
-    BufferCheckCap(MAX_LEN_INTEGER, (Str){});                         // Harsh, as snprintf can overflow
-    isize start  = p->pos;                                            // Mark start
-    p->pos      += snprintf(&BufferAt(0), p->len - p->pos, "%lu", x); // Print as much as possible
-    return BufferStr(p, start);                                       // Return printed part
+    BufferCheckCap(MAX_LEN_INTEGER, (Str){});                            // Harsh, as snprintf can overflow
+    isize start  = p->pos;                                               // Mark start
+    p->pos      += snprintf(&BufferAt(p, 0), p->len - p->pos, "%lu", x); // Print as much as possible
+    return BufferStr(p, start);                                          // Return printed part
 }
 
 SI Str concat__signed_int(Buffer* p, i64 x)
 {
-    BufferCheckCap(MAX_LEN_INTEGER, (Str){});                         // Harsh, as snprintf can overflow
-    isize start  = p->pos;                                            // Mark start
-    p->pos      += snprintf(&BufferAt(0), p->len - p->pos, "%ld", x); // Print as much as possible
-    return BufferStr(p, start);                                       // Return printed part
+    BufferCheckCap(MAX_LEN_INTEGER, (Str){});                            // Harsh, as snprintf can overflow
+    isize start  = p->pos;                                               // Mark start
+    p->pos      += snprintf(&BufferAt(p, 0), p->len - p->pos, "%ld", x); // Print as much as possible
+    return BufferStr(p, start);                                          // Return printed part
 }
 
 SI Str concat__double(Buffer* p, f64 x)
 {
-    BufferCheckCap(MAX_LEN_DOUBLE, (Str){});                         // Harsh, as snprintf can overflow
-    isize start  = p->pos;                                           // Mark start
-    p->pos      += snprintf(&BufferAt(0), p->len - p->pos, "%f", x); // Print as much as possible
-    return BufferStr(p, start);                                      // Return printed part
+    BufferCheckCap(MAX_LEN_DOUBLE, (Str){});                            // Harsh, as snprintf can overflow
+    isize start  = p->pos;                                              // Mark start
+    p->pos      += snprintf(&BufferAt(p, 0), p->len - p->pos, "%f", x); // Print as much as possible
+    return BufferStr(p, start);                                         // Return printed part
 }
