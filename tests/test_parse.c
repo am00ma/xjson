@@ -18,10 +18,10 @@ typedef struct
     X(2, Str, &, a, "a", , parse__Str)
 #define X_COUNT_Struct_A 3
 
-// // Serialize -> print__Struct_A
-// #define X(...) X_PRINT(Struct_A, __VA_ARGS__)
-// X_DECLARE_PRINT(Struct_A, idx, type, ref, field, key, print_fn, parse_fn);
-// #undef X
+// Deserialize -> parse__Struct_A
+#define X(...) X_PARSE(Struct_A, __VA_ARGS__)
+X_DECLARE_PARSE(Struct_A, idx, type, ref, field, key, print_fn, parse_fn);
+#undef X
 
 // --------------- Main ---------------
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     {
         Str src = _("{\"idx\":10, \"len\":345, \"a\":\"hello\"}");
 
-        // Buffer b = BufFromStr(src);
+        Buffer b = BufFromStr(src);
 
         Struct_A expected = {
             .idx = 10,
@@ -42,12 +42,12 @@ int main(int argc, char* argv[])
         };
         Struct_A x = {};
 
-        // Str dst = parse__Struct_A(&b, &x);
+        Str dst = parse__Struct_A(&b, &x);
 
-        Str dst = {};
         EXPECT_EQ_STR(src, dst);
         EXPECT_EQ_INT(x.idx, expected.idx);
         EXPECT_EQ_LONG(x.len, expected.len);
+        EXPECT_EQ_STR(x.a, expected.a);
     }
 
     TEST_RESULTS();

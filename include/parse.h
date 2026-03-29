@@ -16,10 +16,10 @@ SI Str parse__Str(Buffer* b, Str* x)
 {
     Buffer bb = BufFromBuffer(b);
     Str    s  = consume__quoted_string((&bb));
-    if (b->err) return NullStr;
+    if (bb.err) return NullStr;
     b->pos += bb.pos;
-    if (x) *x = (Str){.buf = &s.buf[1], .len = s.len - 1}; // Parsed -> without qoutes
-    return BufToStr((&bb), bb.pos);                        // Quoted was what was consumed
+    if (x) *x = (Str){.buf = &s.buf[1], .len = s.len - 2}; // Parsed -> without qoutes
+    return BufToStr((&bb), bb.pos);                        // Quoted, was what was consumed
 }
 
 SI Str parse__bool(Buffer* b, bool* x)
@@ -99,3 +99,21 @@ SI Str parse__u64(Buffer* b, u64* x)
 //     if (x) *x = strtod(i.buf, 0);
 //     return BufToStr((&bb), bb.pos);
 // }
+
+// --------------- The Infamous X macros ---------------
+
+#define X_PARSE(name, idx, type, ref, field, key, print_fn, parse_fn)                                                  \
+    len += consume__quoted_literal(b, _(key)).len;                                                                     \
+    len += consume__char(b, ':').len;                                                                                  \
+    len += parse_fn(b, ref(x->field)).len;                                                                             \
+    len += (idx == X_COUNT_##name - 1) ? 0 : consume__literal(b, _(", ")).len;
+
+#define X_DECLARE_PARSE(name, idx, type, ref, field, key, print_fn, parse_fn)                                          \
+    SI Str parse__##name(Buffer* b, name* x)                                                                           \
+    {                                                                                                                  \
+        isize len  = 0;                                                                                                \
+        len       += consume__char(b, '{').len;                                                                        \
+        X_TABLE_##name(idx, type, ref, field, key, print_fn, parse_fn);                                                \
+        len += consume__char(b, '}').len;                                                                              \
+        return BufToStr(b, len);                                                                                       \
+    }

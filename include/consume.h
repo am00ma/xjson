@@ -10,76 +10,86 @@ SI Str consume__whitespace(Buffer* b)
     return BufToStr((&bb), bb.pos);                                // Return from local buffer
 }
 
-SI Str consume__anychar(Buffer* p)
+SI Str consume__anychar(Buffer* b)
 {
-    BufCheckCap(p, 1, NullStr); // Error if not long enough
-    p->pos++;                   // Always succeeds, so no need for local buffer
-    return BufToStr(p, 1);      // Return from main buffer
+    BufCheckCap(b, 1, NullStr); // Error if not long enough
+    b->pos++;                   // Always succeeds, so no need for local buffer
+    return BufToStr(b, 1);      // Return from main buffer
 }
 
-SI Str consume__char(Buffer* p, char c)
+SI Str consume__char(Buffer* b, char c)
 {
-    BufCheckCap(p, 1, NullStr);                  // Error if not long enough
-    BufCheckIf(p, !(BufAt(p, 0) == c), NullStr); // Check char
-    p->pos++;                                    // Update buffer on success
-    return BufToStr(p, 1);                       // Return from main buffer
+    BufCheckCap(b, 1, NullStr);                  // Error if not long enough
+    BufCheckIf(b, !(BufAt(b, 0) == c), NullStr); // Check char
+    b->pos++;                                    // Update buffer on success
+    return BufToStr(b, 1);                       // Return from main buffer
 }
 
-SI Str consume__literal(Buffer* p, Str s)
+SI Str consume__literal(Buffer* b, Str s)
 {
-    BufCheckCap(p, s.len, NullStr);                                    // Error if not long enough
-    BufCheckIf(p, !str_equal((Str){&BufAt(p, 0), s.len}, s), NullStr); // Check string
-    p->pos += s.len;                                                   // Update buffer on success
-    return BufToStr(p, s.len);                                         // Return from main buffer
+    BufCheckCap(b, s.len, NullStr);                                    // Error if not long enough
+    BufCheckIf(b, !str_equal((Str){&BufAt(b, 0), s.len}, s), NullStr); // Check string
+    b->pos += s.len;                                                   // Update buffer on success
+    return BufToStr(b, s.len);                                         // Return from main buffer
 }
 
-SI Str consume__quoted_string(Buffer* p)
+SI Str consume__quoted_literal(Buffer* b, Str s)
 {
-    BufCheckCap(p, 2, NullStr);                                      // Error if not long enough
-    Buffer bb = BufFromBuffer(p);                                    // Setup local buffer
-    BufCheckIf(p, (BufAt((&bb), 0) != '"'), NullStr);                // Starting quote
+    BufCheckCap(b, s.len + 2, NullStr);                                // Error if not long enough
+    BufCheckIf(b, (BufAt(b, 0) != '"'), NullStr);                      // Starting quote
+    BufCheckIf(b, !str_equal((Str){&BufAt(b, 1), s.len}, s), NullStr); // Check string
+    BufCheckIf(b, (BufAt(b, s.len + 1) != '"'), NullStr);              // Starting quote
+    b->pos += s.len + 2;                                               // Update buffer on success
+    return BufToStr(b, s.len + 2); // Return from main buffer (what was consumed, not what was parsed)
+}
+
+SI Str consume__quoted_string(Buffer* b)
+{
+    BufCheckCap(b, 2, NullStr);                                      // Error if not long enough
+    Buffer bb = BufFromBuffer(b);                                    // Setup local buffer
+    BufCheckIf(b, (BufAt((&bb), 0) != '"'), NullStr);                // Starting quote
     bb.pos++;                                                        //
     while ((bb.pos <= bb.len) && (BufAt((&bb), 0) != '"')) bb.pos++; // Hack, ignoring escapes for now
-    BufCheckCap(p, 1, NullStr);                                      // Unterminated string
-    BufCheckIf(p, (BufAt((&bb), 0) != '"'), NullStr);                // Ending quote
+    BufCheckCap((&bb), 1, NullStr);                                  // Unterminated string
+    BufCheckIf(b, (BufAt((&bb), 0) != '"'), NullStr);                // Ending quote
     bb.pos++;                                                        //
-    p->pos += bb.pos;                                                // Successful, so update buffer
-    return (Str){&bb.buf[1], bb.pos - 2};                            // Return from local buffer without quotes
+    b->pos += bb.pos;                                                // Successful, so update buffer
+    return BufToStr((&bb), bb.pos); // Return from main buffer (what was consumed, not what was parsed)
 }
 
-SI Str consume__digit(Buffer* p)
+SI Str consume__digit(Buffer* b)
 {
-    BufCheckCap(p, 1, NullStr);                     // Error if not long enough
-    BufCheckIf(p, !is_digit(BufAt(p, 0)), NullStr); // One digit
-    p->pos++;                                       // Update buffer on success
-    return BufToStr(p, 1);                          // Return from main buffer
+    BufCheckCap(b, 1, NullStr);                     // Error if not long enough
+    BufCheckIf(b, !is_digit(BufAt(b, 0)), NullStr); // One digit
+    b->pos++;                                       // Update buffer on success
+    return BufToStr(b, 1);                          // Return from main buffer
 }
 
-SI Str consume__digits(Buffer* p)
+SI Str consume__digits(Buffer* b)
 {
-    Buffer bb = BufFromBuffer(p);                                     // Setup local buffer
+    Buffer bb = BufFromBuffer(b);                                     // Setup local buffer
     while ((bb.pos <= bb.len) && is_digit(BufAt((&bb), 0))) bb.pos++; // Within bounds increment on digit
-    BufCheckIf(p, !(bb.pos), NullStr);                                // Empty string is error
-    p->pos += bb.pos;                                                 // Update buffer on success
+    BufCheckIf(b, !(bb.pos), NullStr);                                // Empty string is error
+    b->pos += bb.pos;                                                 // Update buffer on success
     return BufToStr((&bb), bb.pos);                                   // Return from local buffer
 }
 
-SI Str consume__integer(Buffer* p)
+SI Str consume__integer(Buffer* b)
 {
-    Buffer bb = BufFromBuffer(p);                   // Setup local buffer
+    Buffer bb = BufFromBuffer(b);                   // Setup local buffer
     if (is_sign(BufAt((&bb), 0))) bb.pos++;         // Optional sign
-    BufSafeConsume(p, (&bb), consume__digits(&bb)); // Digits or return error
-    p->pos += bb.pos;                               // Update buffer on success
+    BufSafeConsume(b, (&bb), consume__digits(&bb)); // Digits or return error
+    b->pos += bb.pos;                               // Update buffer on success
     return BufToStr((&bb), bb.pos);                 // Return from local buffer
 }
 
-SI Str consume__fraction(Buffer* p)
+SI Str consume__fraction(Buffer* b)
 {
-    BufCheckCap(p, 1, NullStr);                        // Error if not long enough
-    Buffer bb = BufFromBuffer(p);                      // Setup local buffer
-    BufCheckIf(p, !(BufAt((&bb), 0) == '.'), NullStr); // Mandatory dot
+    BufCheckCap(b, 1, NullStr);                        // Error if not long enough
+    Buffer bb = BufFromBuffer(b);                      // Setup local buffer
+    BufCheckIf(b, !(BufAt((&bb), 0) == '.'), NullStr); // Mandatory dot
     bb.pos++;                                          // Update position
-    BufSafeConsume(p, (&bb), consume__digits(&bb));    // Digits or return error
-    p->pos += bb.pos;                                  // Update buffer on success
+    BufSafeConsume(b, (&bb), consume__digits(&bb));    // Digits or return error
+    b->pos += bb.pos;                                  // Update buffer on success
     return BufToStr((&bb), bb.pos);                    // Return from local buffer
 }
