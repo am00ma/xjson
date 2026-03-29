@@ -25,6 +25,9 @@ typedef double   f64;
 // --------------- Essential macros ---------------
 #define SI static inline
 
+#define MAX_LEN_INTEGER 32
+#define MAX_LEN_DOUBLE  32
+
 #define RANGE(i, n) for (isize i = 0; i < (n); i++)
 
 #define countof(a)  (isize)(sizeof(a) / sizeof(*(a)))
@@ -54,8 +57,9 @@ typedef struct
 
 } Str;
 
-#define _(s)  (Str){.buf = s, .len = sizeof(s) - 1}
-#define __(s) (int)s.len, s.buf
+#define NullStr (Str){}
+#define _(s)    (Str){.buf = s, .len = sizeof(s) - 1}
+#define __(s)   (int)s.len, s.buf
 
 static inline bool str_equal(Str s1, Str s2)
 {
@@ -85,7 +89,8 @@ typedef struct
 #define BufCheckIf(p, cond, val) if ((cond)) { p->err = -1; return val; }
 #define BufCheckCap(p, cap, val) BufCheckIf(p, (p->pos + (cap) > p->len), val)
 
-#define BufSafeConcat( b, bb, expr) ({(expr); if (bb->err) {b->err = bb->err; return (Str){};}})
+// NOTE: !! expr should modify bb !! e.g. `BufSafeConcat(b, (&bb), concat__string((&bb), s))`
+#define BufSafeConcat( b, bb, expr) ({(expr); if (bb->err) {b->err = bb->err; return BufToStr(bb, bb->pos);}})
 #define BufSafeConsume(b, bb, expr) ({(expr); if (bb->err) {b->err = bb->err; return (Str){};}})
 
 // clang-format on
