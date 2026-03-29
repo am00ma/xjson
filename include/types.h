@@ -83,12 +83,13 @@ typedef struct
 #define MAX_LEN_INTEGER 32
 #define MAX_LEN_DOUBLE  32
 
-#define BufferAt(p, len)            (p->buf[p->pos + (len)])
-#define BufferLocal(p)              (Buffer){.buf = &p->buf[p->pos], .pos = 0, .len = (p->len - (p->pos)), .err = 0}
-#define BufferStr(p, start)         (Str){.buf = &p->buf[(start)], .len = (p->pos - (start))}
-#define BufferErrorIf(cond, val)    if ((cond)) { p->err = -1; return val; }
-#define BufferCheckCap(cap, val)    if ((p->pos + cap > p->len)) { p->err = -1; return val; }
-#define BufferSafe(p, expr, start)  expr; if (p->err) { return BufferStr(p, start); }
+#define BufferAt(p, len)                   (p->buf[p->pos + (len)])
+#define BufferLocal(p)                     (Buffer){.buf = &p->buf[p->pos], .pos = 0, .len = (p->len - (p->pos)), .err = 0}
+#define BufferStr(p, start)                (Str){.buf = &p->buf[(start)], .len = (p->pos - (start))}
+#define BufferErrorIf(cond, val)           if ((cond)) { p->err = -1; return val; }
+#define BufferCheckCap(cap, val)           if ((p->pos + cap > p->len)) { p->err = -1; return val; }
+#define BufferSafe(p, expr, start)         expr; if (p->err)  { return BufferStr(p, start); }
+#define BufferSafeConsume(p, bb, expr)     expr; if (bb->err) { p->err = bb->err; return (Str){}; }
 
 #define is_sign(c)   ((c == '-') || (c == '+'))
 #define is_exp(c)    ((c == 'e') || (c == 'E'))
