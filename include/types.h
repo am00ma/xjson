@@ -7,6 +7,9 @@
 #include <stdio.h>  // fprintf, stderr, ..
 #include <string.h> // memset, memcpy
 
+#include <inttypes.h> // strtoimax
+#include <stdlib.h>   // strtoul, strtod
+
 // --------------- Aliases ---------------
 typedef ptrdiff_t isize;
 typedef size_t    usize;
