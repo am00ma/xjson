@@ -2,6 +2,8 @@
 
 #include "test.h"
 
+// --------------- Struct_A ---------------
+
 typedef struct
 {
 
@@ -23,6 +25,8 @@ typedef struct
 X_DECLARE_PRINT(Struct_A, idx, type, ref, field, key, print_fn, parse_fn);
 #undef X
 
+// --------------- Struct_B ---------------
+
 typedef struct
 {
 
@@ -43,6 +47,8 @@ typedef struct
 #define X(...) X_PRINT(Struct_B, __VA_ARGS__)
 X_DECLARE_PRINT(Struct_B, idx, type, ref, field, key, print_fn, parse_fn);
 #undef X
+
+// --------------- Struct_C ---------------
 
 typedef struct
 {
@@ -73,7 +79,6 @@ int main(int argc, char* argv[])
 
     TEST_CASE("Struct_A")
     {
-
         BufFromStack(b, 128);
 
         Struct_A x = {
@@ -89,7 +94,6 @@ int main(int argc, char* argv[])
 
     TEST_CASE("Struct_B")
     {
-
         BufFromStack(b, 128);
 
         Struct_B x = {
@@ -105,19 +109,12 @@ int main(int argc, char* argv[])
 
     TEST_CASE("Struct_C")
     {
-
         BufFromStack(b, 128);
-
-        Struct_A a = {
-            .idx = -20,
-            .len = 567,
-            .a   = _("hello"),
-        };
 
         Struct_C x = {
             .idx = 10,
             .len = 345,
-            .a   = &a,
+            .a   = &(Struct_A){.idx = -20, .len = 567, .a = _("hello")},
         };
 
         Str dst      = print__Struct_C(&b, &x);

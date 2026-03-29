@@ -85,11 +85,34 @@ SI Str consume__integer(Buffer* b)
 
 SI Str consume__fraction(Buffer* b)
 {
-    BufCheckCap(b, 1, NullStr);                        // Error if not long enough
+    if (BufAt(b, 0) != '.') return NullStr;            // Empty string is ok
     Buffer bb = BufFromBuffer(b);                      // Setup local buffer
+    BufCheckCap((&bb), 1, NullStr);                    // Error if not long enough
     BufCheckIf(b, !(BufAt((&bb), 0) == '.'), NullStr); // Mandatory dot
     bb.pos++;                                          // Update position
     BufSafeConsume(b, (&bb), consume__digits(&bb));    // Digits or return error
     b->pos += bb.pos;                                  // Update buffer on success
     return BufToStr((&bb), bb.pos);                    // Return from local buffer
+}
+
+SI Str consume__exponent(Buffer* b)
+{
+    if (!is_exp(BufAt(b, 0))) return NullStr;           // Empty string is ok
+    Buffer bb = BufFromBuffer(b);                       // Setup local buffer
+    BufCheckCap((&bb), 1, NullStr);                     // Error if not long enough
+    BufCheckIf(b, !(is_exp(BufAt((&bb), 0))), NullStr); // Mandatory exponent
+    bb.pos++;                                           // Update position
+    BufSafeConsume(b, (&bb), consume__integer(&bb));    // Integer or return error
+    b->pos += bb.pos;                                   // Update buffer on success
+    return BufToStr((&bb), bb.pos);                     // Return from local buffer
+}
+
+SI Str consume__number(Buffer* b)
+{
+    Buffer bb = BufFromBuffer(b);                     // Setup local buffer
+    BufSafeConsume(b, (&bb), consume__integer(&bb));  // Integer or return error
+    BufSafeConsume(b, (&bb), consume__fraction(&bb)); // Fraction or return error
+    BufSafeConsume(b, (&bb), consume__exponent(&bb)); // Exponent or return error
+    b->pos += bb.pos;                                 // Update buffer on success
+    return BufToStr((&bb), bb.pos);                   // Return from local buffer
 }

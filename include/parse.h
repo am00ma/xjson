@@ -80,25 +80,29 @@ SI Str parse__u64(Buffer* b, u64* x)
     return BufToStr((&bb), bb.pos);
 }
 
-// SI Str parse__f32(Buffer* b, f32* x)
-// {
-//     Buffer bb = BufFromBuffer(b);
-//     Str    i  = consume__integer((&bb));
-//     if (bb.err) return NullStr;
-//     b->pos += bb.pos;
-//     if (x) *x = strtof(i.buf, 0);
-//     return BufToStr((&bb), bb.pos);
-// }
+SI Str parse__f32(Buffer* b, f32* x)
+{
+    Buffer bb = BufFromBuffer(b);
+    Str    i  = consume__number((&bb));
+    if (bb.err) return NullStr;
+    b->pos += bb.pos;
+    if (x) *x = strtof(i.buf, 0);
+    return BufToStr((&bb), bb.pos);
+}
 
-// SI Str parse__f64(Buffer* b, f64* x)
-// {
-//     Buffer bb = BufFromBuffer(b);
-//     Str    i  = consume__integer((&bb));
-//     if (bb.err) return NullStr;
-//     b->pos += bb.pos;
-//     if (x) *x = strtod(i.buf, 0);
-//     return BufToStr((&bb), bb.pos);
-// }
+SI Str parse__f64(Buffer* b, f64* x)
+{
+    Buffer bb = BufFromBuffer(b);
+    Str    i  = consume__number((&bb));
+    if (bb.err) return NullStr;
+    b->pos += bb.pos;
+    if (x) *x = strtod(i.buf, 0);
+    return BufToStr((&bb), bb.pos);
+}
+
+// --------------- TODO: Array ---------------
+
+#define parse__array(type, b, arr)
 
 // --------------- The Infamous X macros ---------------
 

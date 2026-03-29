@@ -8,6 +8,7 @@ typedef struct
 
     i32 idx;
     u64 len;
+    f32 f;
     Str a;
 
 } Struct_A;
@@ -16,8 +17,9 @@ typedef struct
 #define X_TABLE_Struct_A(idx, type, ref, field, key, print_fn, parse_fn)                                               \
     X(0, i32, &, idx, "idx", , parse__i32)                                                                             \
     X(1, u64, &, len, "len", , parse__u64)                                                                             \
-    X(2, Str, &, a, "a", , parse__Str)
-#define X_COUNT_Struct_A 3
+    X(2, f32, &, f, "f", , parse__f32)                                                                                 \
+    X(3, Str, &, a, "a", , parse__Str)
+#define X_COUNT_Struct_A 4
 
 // Deserialize -> parse__Struct_A
 #define X(...) X_PARSE(Struct_A, __VA_ARGS__)
@@ -72,17 +74,18 @@ X_DECLARE_PARSE(Struct_C, idx, type, ref, field, key, print_fn, parse_fn);
 
 int main(int argc, char* argv[])
 {
-    TEST_SUITE("print");
+    TEST_SUITE("parse");
 
     TEST_CASE("Struct_A")
     {
-        Str src = _("{\"idx\":10, \"len\":345, \"a\":\"hello\"}");
+        Str src = _("{\"idx\":10, \"len\":345, \"f\":3.140000, \"a\":\"hello\"}");
 
         Buffer b = BufFromStr(src);
 
         Struct_A expected = {
             .idx = 10,
             .len = 345,
+            .f   = 3.14,
             .a   = _("hello"),
         };
         Struct_A x = {};
@@ -92,19 +95,20 @@ int main(int argc, char* argv[])
         EXPECT_EQ_STR(src, dst);
         EXPECT_EQ_INT(x.idx, expected.idx);
         EXPECT_EQ_LONG(x.len, expected.len);
+        EXPECT_EQ_FLOAT(x.f, expected.f);
         EXPECT_EQ_STR(x.a, expected.a);
     }
 
     TEST_CASE("Struct_B")
     {
-        Str src = _("{\"idx\":10, \"len\":345, \"a\":{\"idx\":-20, \"len\":567, \"a\":\"hello\"}}");
+        Str src = _("{\"idx\":10, \"len\":345, \"a\":{\"idx\":-20, \"len\":567, \"f\":3.140000, \"a\":\"hello\"}}");
 
         Buffer b = BufFromStr(src);
 
         Struct_B expected = {
             .idx = 10,
             .len = 345,
-            .a   = {.idx = -20, .len = 567, .a = _("hello")},
+            .a   = {.idx = -20, .len = 567, .f = 3.14, .a = _("hello")},
         };
         Struct_B x = {};
 
@@ -115,19 +119,20 @@ int main(int argc, char* argv[])
         EXPECT_EQ_LONG(x.len, expected.len);
         EXPECT_EQ_INT(x.a.idx, expected.a.idx);
         EXPECT_EQ_LONG(x.a.len, expected.a.len);
+        EXPECT_EQ_FLOAT(x.a.f, expected.a.f);
         EXPECT_EQ_STR(x.a.a, expected.a.a);
     }
 
     TEST_CASE("Struct_C")
     {
-        Str src = _("{\"idx\":10, \"len\":345, \"a\":{\"idx\":-20, \"len\":567, \"a\":\"hello\"}}");
+        Str src = _("{\"idx\":10, \"len\":345, \"a\":{\"idx\":-20, \"len\":567, \"f\":3.140000, \"a\":\"hello\"}}");
 
         Buffer b = BufFromStr(src);
 
         Struct_C expected = {
             .idx = 10,
             .len = 345,
-            .a   = &(Struct_A){.idx = -20, .len = 567, .a = _("hello")},
+            .a   = &(Struct_A){.idx = -20, .len = 567, .f = 3.14, .a = _("hello")},
         };
 
         Struct_C x = {.a = &(Struct_A){}};
@@ -139,6 +144,7 @@ int main(int argc, char* argv[])
         EXPECT_EQ_LONG(x.len, expected.len);
         EXPECT_EQ_INT(x.a->idx, expected.a->idx);
         EXPECT_EQ_LONG(x.a->len, expected.a->len);
+        EXPECT_EQ_FLOAT(x.a->f, expected.a->f);
         EXPECT_EQ_STR(x.a->a, expected.a->a);
     }
 

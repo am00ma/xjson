@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math.h>  // IWYU pragma: keep
 #include <regex.h> // regex_t, ...
 #include <stdio.h> // fprintf, stderr
 
