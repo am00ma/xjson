@@ -68,6 +68,10 @@ Conclusion:
 
 ## Functional Requirements
 
+For consume and concat, perhaps returning error is enough.
+That way, it can start to resemble `sprintf/scanf` combo.
+Perhaps, we can even support `%v` like golang.
+
 ## Timeline
 
 - 28th March: Beginnings - printing is working
