@@ -43,13 +43,61 @@ SI Str consume__quoted_literal(Buffer* b, Str s)
     return BufToStr(b, s.len + 2); // Return from main buffer (what was consumed, not what was parsed)
 }
 
+SI Str consume__json_string(Buffer* b)
+{
+    BufCheckCap(b, 2, NullStr);                       // Error if not long enough
+    Buffer bb = BufFromBuffer(b);                     // Setup local buffer
+    BufCheckIf(b, (BufAt((&bb), 0) != '"'), NullStr); // Starting quote
+    bb.pos++;                                         //
+
+    while (bb.pos <= bb.len)
+    {
+        switch (BufAt((&bb), 0))
+        {
+        case '"':
+            bb.pos++;
+            goto __done;
+            break;
+        case '\\': {
+            bb.pos++;
+            BufCheckCap((&bb), 1, NullStr);
+            if (is_escape(BufAt((&bb), 0))) { bb.pos++; }
+            else if (BufAt((&bb), 0) == 'u')
+            {
+                bb.pos++;
+                BufCheckCap((&bb), 4, NullStr);
+                if (is_hex(BufAt((&bb), 0))    //
+                    && is_hex(BufAt((&bb), 1)) //
+                    && is_hex(BufAt((&bb), 2)) //
+                    && is_hex(BufAt((&bb), 3)))
+                {
+                    bb.pos += 4;
+                }
+                else BufCheckIf(b, true, NullStr);
+            }
+            else
+            {
+                BufCheckIf(b, true, NullStr);
+            }
+        }
+        break;
+        default: bb.pos++; break;
+        }
+    }
+
+__done:
+    BufCheckIf(b, (BufAt(b, bb.pos - 1) != '"'), NullStr); // Last char was quote
+    b->pos += bb.pos;                                      // Successful, so update buffer
+    return BufToStr((&bb), bb.pos); // Return from main buffer (what was consumed, not what was parsed)
+}
+
 SI Str consume__quoted_string(Buffer* b)
 {
     BufCheckCap(b, 2, NullStr);                                      // Error if not long enough
     Buffer bb = BufFromBuffer(b);                                    // Setup local buffer
     BufCheckIf(b, (BufAt((&bb), 0) != '"'), NullStr);                // Starting quote
     bb.pos++;                                                        //
-    while ((bb.pos <= bb.len) && (BufAt((&bb), 0) != '"')) bb.pos++; // Hack, ignoring escapes for now
+    while ((bb.pos <= bb.len) && (BufAt((&bb), 0) != '"')) bb.pos++; // HACK: ignoring escapes for now
     BufCheckCap((&bb), 1, NullStr);                                  // Unterminated string
     BufCheckIf(b, (BufAt((&bb), 0) != '"'), NullStr);                // Ending quote
     bb.pos++;                                                        //

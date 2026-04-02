@@ -108,6 +108,33 @@ int main(int argc, char* argv[])
         }
     }
 
+    TEST_CASE("json_string")
+    {
+        TestConsume tests[] = {
+            {_("\"a\""), 0, _("\"a\"")},                                     // Normal case
+            {_("\" \""), 0, _("\" \"")},                                     //
+            {_(""), -1, _("")},                                              // Empty case 1 - fail
+            {_("\""), -1, _("")},                                            // Empty case 2 - unterminated
+            {_(" "), -1, _("")},                                             // Empty case 3 - no quote
+            {_("\"ab\"x"), 0, _("\"ab\"")},                                  // Truncate after match
+            {_("x\"ab\""), -1, _("")},                                       // Only from start
+            {_("\"a \\\" \""), 0, _("\"a \\\" \"")},                         // Escapes 1
+            {_("\"a \\\" \\n \\t \""), 0, _("\"a \\\" \\n \\t \"")},         // Escapes 2
+            {_("\"a \\\" \\u \\t \""), -1, _("")},                           // Escapes 3
+            {_("\"a \\\" \\uffff \\t \""), 0, _("\"a \\\" \\uffff \\t \"")}, // Escapes 4
+            {_("\"a \\a \\uffff \\t \""), -1, _("")},                        // Escapes 5
+        };
+
+        RANGE(i, countof(tests))
+        {
+            SETUP_BUFFER(b, tests[i].src);
+
+            Str dst = consume__json_string(&b);
+            EXPECT_EQ_INT(b.err, tests[i].err);
+            EXPECT_EQ_STR(dst, tests[i].dst);
+        }
+    }
+
     TEST_CASE("quoted_string")
     {
         TestConsume tests[] = {
