@@ -125,14 +125,15 @@ int main(int argc, char* argv[])
 
     TEST_CASE("Struct_C")
     {
-        Str src = _("{\"idx\":10, \"len\":345, \"a\":{\"idx\":-20, \"len\":567, \"f\":3.140000, \"a\":\"hello\"}}");
+        Str src = _("{\"idx\":10, \"len\":345, \"a\":{\"idx\":-20, \"len\":567, \"f\":3.140000, \"a\":\"hello \\\" 😾 "
+                    "\\n \"}}");
 
         Buffer b = BufFromStr(src);
 
         Struct_C expected = {
             .idx = 10,
             .len = 345,
-            .a   = &(Struct_A){.idx = -20, .len = 567, .f = 3.14, .a = _("hello")},
+            .a   = &(Struct_A){.idx = -20, .len = 567, .f = 3.14, .a = _("hello \\\" 😾 \\n ")},
         };
 
         Struct_C x = {.a = &(Struct_A){}};

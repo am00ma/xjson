@@ -15,7 +15,7 @@ SI Str parse__char(Buffer* b, char* x)
 SI Str parse__Str(Buffer* b, Str* x)
 {
     Buffer bb = BufFromBuffer(b);
-    Str    s  = consume__quoted_string((&bb));
+    Str    s  = consume__json_string((&bb));
     if (bb.err) return NullStr;
     b->pos += bb.pos;
     if (x) *x = (Str){.buf = &s.buf[1], .len = s.len - 2}; // Parsed -> without qoutes
