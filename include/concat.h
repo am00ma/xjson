@@ -2,6 +2,18 @@
 
 #include "types.h"
 
+// --------------- Declaration ---------------
+
+SI Str concat__char(Buffer* b, char c);
+SI Str concat__string(Buffer* b, Str s);
+SI Str concat__quoted_string(Buffer* b, Str s);
+SI Str concat__bool(Buffer* b, bool x);
+SI Str concat__unsigned_int(Buffer* b, u64 x);
+SI Str concat__signed_int(Buffer* b, i64 x);
+SI Str concat__double(Buffer* b, f64 x);
+
+// --------------- Implementation ---------------
+
 SI Str concat__char(Buffer* b, char c)
 {
     BufCheckCap(b, 1, NullStr); // Check capacity

@@ -2,6 +2,25 @@
 
 #include "types.h"
 
+// --------------- Declaration ---------------
+
+SI Str consume__whitespace(Buffer* b);
+SI Str consume__anychar(Buffer* b);
+SI Str consume__json_string(Buffer* b);
+SI Str consume__quoted_string(Buffer* b);
+SI Str consume__digit(Buffer* b);
+SI Str consume__digits(Buffer* b);
+SI Str consume__integer(Buffer* b);
+SI Str consume__fraction(Buffer* b);
+SI Str consume__exponent(Buffer* b);
+SI Str consume__number(Buffer* b);
+
+SI Str consume__char(Buffer* b, char c);
+SI Str consume__literal(Buffer* b, Str s);
+SI Str consume__quoted_literal(Buffer* b, Str s);
+
+// --------------- Implementation ---------------
+
 SI Str consume__whitespace(Buffer* b)
 {
     Buffer bb = BufFromBuffer(b);                                  // Setup local buffer

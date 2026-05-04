@@ -2,6 +2,20 @@
 
 #include "consume.h"
 
+// --------------- Declaration ---------------
+
+SI Str parse__char(Buffer* b, char* x);
+SI Str parse__Str(Buffer* b, Str* x);
+SI Str parse__bool(Buffer* b, bool* x);
+SI Str parse__u32(Buffer* b, u32* x);
+SI Str parse__u64(Buffer* b, u64* x);
+SI Str parse__i32(Buffer* b, i32* x);
+SI Str parse__i64(Buffer* b, i64* x);
+SI Str parse__f32(Buffer* b, f32* x);
+SI Str parse__f64(Buffer* b, f64* x);
+
+// --------------- Implementation ---------------
+
 SI Str parse__char(Buffer* b, char* x)
 {
     Buffer bb = BufFromBuffer(b);
@@ -50,16 +64,6 @@ SI Str parse__i32(Buffer* b, i32* x)
     return BufToStr((&bb), bb.pos);
 }
 
-SI Str parse__i64(Buffer* b, i64* x)
-{
-    Buffer bb = BufFromBuffer(b);
-    Str    i  = consume__integer((&bb));
-    if (bb.err) return NullStr;
-    b->pos += bb.pos;
-    if (x) *x = strtol(i.buf, 0, 10);
-    return BufToStr((&bb), bb.pos);
-}
-
 SI Str parse__u32(Buffer* b, u32* x)
 {
     Buffer bb = BufFromBuffer(b);
@@ -77,6 +81,16 @@ SI Str parse__u64(Buffer* b, u64* x)
     if (bb.err) return NullStr;
     b->pos += bb.pos;
     if (x) *x = strtoul(i.buf, 0, 10);
+    return BufToStr((&bb), bb.pos);
+}
+
+SI Str parse__i64(Buffer* b, i64* x)
+{
+    Buffer bb = BufFromBuffer(b);
+    Str    i  = consume__integer((&bb));
+    if (bb.err) return NullStr;
+    b->pos += bb.pos;
+    if (x) *x = strtol(i.buf, 0, 10);
     return BufToStr((&bb), bb.pos);
 }
 
