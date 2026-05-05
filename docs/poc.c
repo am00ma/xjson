@@ -35,11 +35,42 @@ SI void printvar__##name(name* x) { p_inline("["); RANGE(i, x->len) {printvar__#
 X_TABLE_PRIMITIVES(type, fmt, ...);
 #undef X
 
-// --------------- Definition of struct using X-Table ---------------
+// --------------- X-Macros: Struct: Library ---------------
 
-/*
-* Needs to be declared by user
-*/
+#define DECLARE_DEFINE_STRUCT_FIELD(type, field, isref1, isref2) type isref2 field;
+
+#define DECLARE_DEFINE_STRUCT(name, type, field, isref1, isref2) \
+typedef struct                                                   \
+{                                                                \
+    X_TABLE_##name(type, field, isref1, isref2);                 \
+} name;
+
+// --------------- X-Macros: Print: Library ---------------
+
+#define DECLARE_PRINT_FIELD(type, field, isref1, isref2) p_inline(#field "="); printvar__##type(isref1(x->field)); p_inline(", ");
+
+#define DECLARE_PRINT_STRUCT(name, type, field, isref1, isref2) \
+    SI void printvar__##name(name* x)                           \
+    {                                                           \
+        p_inline("{");                                          \
+        X_TABLE_##name(type, field, isref1, isref2);            \
+        p_inline("}");                                          \
+    }
+
+// --------------- X-Macros: Experimental: Pretty Print (TODO: Need indent for nesting): Library ---------------
+
+#define DECLARE_PRINT_FIELD_PRETTY(type, field, isref1, isref2) p_inline("  " #field "="); printvar__##type(isref1(x->field)); p_inline(",\n");
+
+#define DECLARE_PRINT_FIELD_PRETTY_FN(name, type, field, isref1, isref2)  \
+    SI void pretty_printvar__##name(name* x)                              \
+    {                                                                     \
+        p_inline("{\n");                                                  \
+        X_TABLE_##name(type, field, isref1, isref2);                      \
+        p_inline("}\n");                                                  \
+    }
+
+// --------------- Definition of struct using X-Table: User ---------------
+
 #define X_TABLE_Primitives(type, field, isref1, isref2) \
 X(bool,     f_bool,     &, ) \
 X(char,     f_char,     &, ) \
@@ -69,57 +100,17 @@ X(arr_i64,  f_arr_i64,  &, ) \
 X(arr_f64,  f_arr_f64,  &, ) \
 X(arr_Str,  f_arr_Str,  &, ) \
 
-// --------------- X-Macros: Struct ---------------
-
-#define DECLARE_DEFINE_STRUCT_FIELD(type, field, isref1, isref2) type isref2 field;
-
-#define DECLARE_DEFINE_STRUCT(name, type, field, isref1, isref2) \
-typedef struct                                                   \
-{                                                                \
-    X_TABLE_##name(type, field, isref1, isref2);                 \
-} name;
-
-/*
-* Needs to be declared by user
-*/
+// X-Macros: Struct: User
 #define X(type, field, isref1, isref2) DECLARE_DEFINE_STRUCT_FIELD(type, field, isref1, isref2)
 DECLARE_DEFINE_STRUCT(Primitives, type, field, isref1, isref2)
 #undef X
 
-// --------------- X-Macros: Print ---------------
-
-#define DECLARE_PRINT_FIELD(type, field, isref1, isref2) p_inline(#field "="); printvar__##type(isref1(x->field)); p_inline(", ");
-
-#define DECLARE_PRINT_STRUCT(name, type, field, isref1, isref2) \
-    SI void printvar__##name(name* x)                           \
-    {                                                           \
-        p_inline("{");                                          \
-        X_TABLE_##name(type, field, isref1, isref2);            \
-        p_inline("}");                                          \
-    }
-
-/*
-* Needs to be declared by user
-*/
+// X-Macros: Print: User
 #define X(type, field, isref1, isref2) DECLARE_PRINT_FIELD(type, field, isref1, isref2)
 DECLARE_PRINT_STRUCT(Primitives, type, field, isref1, isref2)
 #undef X
 
-// --------------- X-Macros: Experimental: Pretty Print (TODO: Need indent for nesting) ---------------
-
-#define DECLARE_PRINT_FIELD_PRETTY(type, field, isref1, isref2) p_inline("  " #field "="); printvar__##type(isref1(x->field)); p_inline(",\n");
-
-#define DECLARE_PRINT_FIELD_PRETTY_FN(name, type, field, isref1, isref2)  \
-    SI void pretty_printvar__##name(name* x)                              \
-    {                                                                     \
-        p_inline("{\n");                                                  \
-        X_TABLE_##name(type, field, isref1, isref2);                      \
-        p_inline("}\n");                                                  \
-    }
-
-/*
-* Needs to be declared by user
-*/
+// X-Macros: Pretty Print: User
 #define X(type, field, isref1, isref2) DECLARE_PRINT_FIELD_PRETTY(type, field, isref1, isref2)
 DECLARE_PRINT_FIELD_PRETTY_FN(Primitives, type, field, isref1, isref2)
 #undef X
