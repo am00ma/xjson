@@ -31,6 +31,28 @@ SI void printvar__arr_Str(arr_Str* x)
     p_inline("]");
 }
 
+// // --------------- Arrays ---------------
+//
+// #define DECLARE_ARRAY(name, type) typedef struct { type* buf; isize len; } name
+//
+// #define X(type, fmt, ...) DECLARE_ARRAY(arr_##type, type);
+// X_TABLE_PRIMITIVES(type, fmt, ...);
+// #undef X
+//
+// #define DECLARE_PRINTVAR_ARRAY(name, type) \
+//     SI void printvar__##name(name* x)                                      \
+//     {                                                                      \
+//         if (!x->len) {p_inline("[]"); return;}                             \
+//         p_inline("[");                                                     \
+//         RANGE(i, x->len-1) {printvar__##type(&x->buf[i]); p_inline(", ");} \
+//         printvar__##type(&x->buf[x->len-1]);                               \
+//         p_inline("]");                                                     \
+//     }
+//
+// #define X(type, fmt, ...) DECLARE_PRINTVAR_ARRAY(arr_##type, type);
+// X_TABLE_PRIMITIVES(type, fmt, ...);
+// #undef X
+
 // clang-format on
 
 // --------------- Tests ---------------

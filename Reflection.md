@@ -10,6 +10,7 @@ Arguments used for reflection:
 - field: Used to put/get `x->field`
 - ref: Used in `print__##name(b, ref(x))` to call either `print__<>(x)` or `print__<>(&x)`
 - isarray: Used to differentiate between arrays and normals, to call `print__array__<>(x)`
+  - Deprecated in favour of common name for arrays
 
 Specific to serialization
 
