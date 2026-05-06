@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.15)
 project(
     "xjson"
     VERSION 0.0.1
-    LANGUAGES C)
+    LANGUAGES C CXX)
 
 # =========================================================================
 #                      Tests
@@ -17,6 +17,7 @@ add_subdirectory(tests)
 #                      Docs
 # =========================================================================
 add_subdirectory(docs)
+add_subdirectory(docs_cpp)
 
 # =========================================================================
 #                      Installation

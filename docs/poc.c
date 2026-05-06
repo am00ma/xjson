@@ -1,7 +1,7 @@
 #include "types.h"
 // clang-format off
 
-// --------------- Primitives ---------------
+// --------------- Primitives: Library ---------------
 
 #define X_TABLE_PRIMITIVES(type, fmt, ...) \
 X(bool,"%s"  , *x ? "true" : "false") \
@@ -18,7 +18,7 @@ X(Str, "%.*s", (int)(x)->len, (x)->buf)
 X_TABLE_PRIMITIVES(type, fmt, ...);
 #undef X
 
-// --------------- Arrays: Declaration ---------------
+// --------------- Arrays: Declaration: Library ---------------
 
 #define DECLARE_ARRAY(name, type) typedef struct { type* buf; isize len; } name
 
@@ -26,7 +26,7 @@ X_TABLE_PRIMITIVES(type, fmt, ...);
 X_TABLE_PRIMITIVES(type, fmt, ...);
 #undef X
 
-// --------------- Arrays: Printing ---------------
+// --------------- Arrays: Printing: Library ---------------
 
 #define DECLARE_PRINTVAR_ARRAY(name, type) \
 SI void printvar__##name(name* x) { p_inline("["); RANGE(i, x->len) {printvar__##type(&x->buf[i]); p_inline(", ");} p_inline("]"); }
